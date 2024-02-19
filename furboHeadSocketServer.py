@@ -4,7 +4,7 @@ from threading import Thread
 connectMsg = "Connected"
 disConnectMsg = "Disconnected"
 
-host = "127.0.0.1"
+host = socket.gethostname()
 port = 8080
 
 cons = []
