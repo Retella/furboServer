@@ -4,7 +4,7 @@ from threading import Thread
 connectMsg = "Connected"
 disConnectMsg = "Disconnected"
 
-host = socket.gethostname()
+host = "0.0.0.0"
 port = 8080
 
 cons = []
@@ -13,10 +13,10 @@ soc = socket.socket()
 soc.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 soc.bind((host, port))
 soc.listen(10)
-	
+
 def handleConnection(soca, cona, addra):
 	print(f"Accepted {addra}")
-	
+
 	if cons == []: cons.append([cona])
 	else:
 		for c in range(len(cons)):
@@ -26,7 +26,7 @@ def handleConnection(soca, cona, addra):
 				break
 			if c == len(cons) - 1:
 				cons.append([cona])
-	
+
 	while True:
 		data = cona.recv(1024).decode()
 		if data:
