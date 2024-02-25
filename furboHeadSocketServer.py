@@ -1,11 +1,11 @@
-import socket, traceback, time
+import socket, time
 from threading import Thread
 
 connectMsg = "Connected"
 disConnectMsg = "Disconnected"
 
 host = "0.0.0.0"
-port = 8080
+port = 9090
 
 cons = []
 
@@ -14,7 +14,7 @@ soc.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 soc.bind((host, port))
 soc.listen(10)
 
-def handleConnection(soca, cona, addra):
+def handleConnection(cona, addra):
 	print(f"Accepted {addra}")
 
 	if cons == []: cons.append([cona])
@@ -22,7 +22,8 @@ def handleConnection(soca, cona, addra):
 		for c in range(len(cons)):
 			if len(cons[c]) < 2:
 				cons[c].append(cona)
-				shout(connectMsg, cona)
+				for coner in cons[c]:
+					shout(connectMsg, coner)
 				break
 			if c == len(cons) - 1:
 				cons.append([cona])
@@ -53,4 +54,4 @@ print(f"Listening on {port}")
 while True:
 	time.sleep(1)
 	con, addr = soc.accept()
-	Thread(target=handleConnection, args=[soc, con, addr]).start()
+	Thread(target=handleConnection, args=[con, addr]).start()
