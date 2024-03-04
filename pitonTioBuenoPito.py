@@ -2,23 +2,21 @@ import pygame
 import socket
 from threading import Thread
 
-#Functions#
+#Functions
 
-def blitRotate(surf, image, origin, pivot, angle):
-    image_rect = image.get_rect(topleft = (origin[0] - pivot[0], origin[1]-pivot[1]))
-    offset_center_to_pivot = pygame.math.Vector2(pivot) - image_rect.center
-    rotated_offset = offset_center_to_pivot.rotate(-angle)
-    rotated_image_center = (origin[0] - rotated_offset.x, origin[1] - rotated_offset.y)
+def rot_center(image, angle, x, y):
+    
     rotated_image = pygame.transform.rotate(image, angle)
-    rotated_image_rect = rotated_image.get_rect(center = rotated_image_center)
-    surf.blit(rotated_image, rotated_image_rect)
+    new_rect = rotated_image.get_rect(center = image.get_rect(center = (x, y)).center)
+
+    return rotated_image, new_rect
 
 #Pseudo-constants
 pygame.init()
 resInfo = pygame.display.Info()
 resolution = [resInfo.current_w,  resInfo.current_h]
 ballRadius = 40
-gravity = 0.0
+gravity = 0.5
 jumpForce = 8
 
 host ="127.0.0.1"
@@ -42,8 +40,8 @@ pPos = [
 
 players = [pygame.mask.Mask, pygame.mask.Mask]
 
-rotp1 = pygame.Surface((resolution[0]/20, resolution[1]/5)).convert_alpha()
-rotp2 = pygame.Surface((resolution[0]/20, resolution[1]/5)).convert_alpha()
+img1 = pygame.Surface((resolution[0]/20, resolution[1]/5)).convert_alpha()
+img2 = pygame.Surface((resolution[0]/20, resolution[1]/5)).convert_alpha()
 
 ballPos = (int(resolution[0]/2) - ballRadius/2, int(resolution[1]/2))
 ballr1 = pygame.Rect((ballPos[0] - ballPos[0]/2, ballPos[1] - ballPos[1]/2), (ballRadius, ballRadius))
@@ -81,14 +79,15 @@ while running:
        
        pygame.draw.circle(screen, ballColor, ballPos, ballRadius)
        
-       blitRotate(screen, rotp1, (resolution[0]/2, resolution[1]/2), (0,0), 60)
+       rotp1, rotr1 = rot_center(img1, 60, pPos[0][0], pPos[0][1])
+       rotp2, rotr2 = rot_center(img2, 0, pPos[1][0], pPos[1][1])
        	
        players[0] = pygame.mask.from_surface(rotp1, 0)
        players[1] = pygame.mask.from_surface(rotp2)
        
-       screen.blit(rotp1, pPos[0])
+       screen.blit(rotp1, rotr1)
        if not alone:
-       	screen.blit(rotp2, pPos[1])
+       	screen.blit(rotp2, rotr2)
        
        pygame.display.flip()
        
@@ -101,8 +100,6 @@ while running:
         
         p[0] += speeds[idx][0]
         p[1] += speeds[idx][1]
-
-        
          	
        if data == "a" and grounded[1]:
          	speeds[1][1] -= jumpForce
