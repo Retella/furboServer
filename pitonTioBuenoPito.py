@@ -17,7 +17,7 @@ resInfo = pygame.display.Info()
 resolution = [resInfo.current_w,  resInfo.current_h]
 ballRadius = 40
 gravity = 0.5
-jumpForce = 8
+jumpForce = 15
 
 host ="127.0.0.1"
 port = 9090
@@ -31,12 +31,14 @@ ballColor = (255, 255, 255)
 #Rects
 screen = pygame.display.set_mode(resolution)
 
-floor = pygame.Rect((0,resolution[1]*2/3),(resolution[0], resolution[1]/3))
+floorImg = pygame.Surface((resolution[0], resolution[1]/3))
+floorm = pygame.mask.from_surface(floorImg)
 
 pPos = [
 [resolution[0]/4 - resolution[0]/20/2, resolution[1]/3],
     [resolution[0] - resolution[0]/4 - resolution[0]/20/2, resolution[1]/3]
 ]
+floorPos = (0, 2*resolution[1]/3)
 
 players = [pygame.mask.Mask, pygame.mask.Mask]
 
@@ -75,14 +77,16 @@ while running:
        
        #Drawing
        screen.fill(backgroundColor)
-       pygame.draw.rect(screen, floorColor, floor)
+       
+       floorImg.fill(floorColor)
+       screen.blit(floorImg, floorPos)
        
        pygame.draw.circle(screen, ballColor, ballPos, ballRadius)
        
-       rotp1, rotr1 = rot_center(img1, 60, pPos[0][0], pPos[0][1])
+       rotp1, rotr1 = rot_center(img1, 0, pPos[0][0], pPos[0][1])
        rotp2, rotr2 = rot_center(img2, 0, pPos[1][0], pPos[1][1])
        	
-       players[0] = pygame.mask.from_surface(rotp1, 0)
+       players[0] = pygame.mask.from_surface(rotp1)
        players[1] = pygame.mask.from_surface(rotp2)
        
        screen.blit(rotp1, rotr1)
@@ -100,6 +104,13 @@ while running:
         
         p[0] += speeds[idx][0]
         p[1] += speeds[idx][1]
+        
+        grounded[0] = players[0].overlap(floorm, (int(-rotr1[0]), int(floorPos[1] - rotr1[1])))
+        grounded[1] = players[1].overlap(floorm, (int(-rotr2[0]), int(floorPos[1] - rotr2[1])))
+        
+        for i in range(2):
+         	if grounded[i]:
+         		speeds[i][1] = -speeds[i][1]
          	
        if data == "a" and grounded[1]:
          	speeds[1][1] -= jumpForce
@@ -116,7 +127,6 @@ while running:
         if event.type == pygame.MOUSEBUTTONDOWN:
         	soc.send("a".encode())
         	if grounded[0]:
-        	 speeds[0][1] -= jumpForce
-    
+        	 speeds[0][1] -= jumpForce		
 
 pygame.quit()
