@@ -41,6 +41,7 @@ def handleConnection(cona, addra):
 		for discon in c:
 			if discon == cona:
 				c.pop(c.index(discon))
+				shout(disConnectMsg, cona)
 
 def shout(dater, conn):
 	for c in cons:
